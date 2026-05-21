@@ -1,11 +1,12 @@
 // CopyChapaCalculator — Service Worker
-const CACHE_NAME = 'copychapa-v1';
+const APP_VERSION = '2026.05.21.1';
+const CACHE_NAME = `copychapa-v${APP_VERSION}`;
 const ASSETS = [
   './index.html',
+  `./app.js?v=${APP_VERSION}`,
   './manifest.json',
   './icon-192.png',
-  './icon-512.png',
-  'https://fonts.googleapis.com/css2?family=Nunito:wght@400;500;600;700;800&family=Roboto+Mono:wght@400;500&display=swap'
+  './icon-512.png'
 ];
 
 // Install: pre-cachear assets principales
@@ -13,7 +14,7 @@ self.addEventListener('install', event => {
   event.waitUntil(
     caches.open(CACHE_NAME).then(cache => {
       // Cachear assets locales (los de fuentes pueden fallar, ignoramos el error)
-      return cache.addAll(['./index.html', './manifest.json']).catch(() => {});
+      return cache.addAll(ASSETS).catch(() => {});
     }).then(() => self.skipWaiting())
   );
 });
@@ -29,15 +30,27 @@ self.addEventListener('activate', event => {
   );
 });
 
-// Fetch: Cache-first para assets propios, Network-first para el resto
+// Fetch: Network-first para HTML, cache-first para assets propios versionados.
 self.addEventListener('fetch', event => {
   const url = new URL(event.request.url);
 
   // Solo manejar GET
   if (event.request.method !== 'GET') return;
 
-  // Estrategia Cache-first para assets del mismo origen
   if (url.origin === location.origin) {
+    if (event.request.mode === 'navigate' || url.pathname.endsWith('/index.html')) {
+      event.respondWith(
+        fetch(event.request).then(response => {
+          if (response && response.status === 200) {
+            const clone = response.clone();
+            caches.open(CACHE_NAME).then(cache => cache.put('./index.html', clone));
+          }
+          return response;
+        }).catch(() => caches.match('./index.html'))
+      );
+      return;
+    }
+
     event.respondWith(
       caches.match(event.request).then(cached => {
         if (cached) return cached;
