@@ -1045,6 +1045,30 @@
   </div>
 
   <div class="card">
+    <div class="card-title">📄 Resma de hojas fotográficas</div>
+    <div class="field">
+      <label>Valor de la resma</label>
+      <div class="input-wrap">
+        <span class="input-prefix">$</span>
+        <input type="number" id="cfg-resma-foto-precio" placeholder="0.00" min="0" step="0.01" oninput="calcCostoHojaFoto()">
+      </div>
+    </div>
+    <div class="field-row">
+      <div class="field">
+        <label>Hojas / resma</label>
+        <input type="number" id="cfg-resma-foto-hojas" placeholder="500" min="1" oninput="calcCostoHojaFoto()">
+      </div>
+      <div class="field">
+        <label>Costo / hoja</label>
+        <div class="input-wrap">
+          <span class="input-prefix">$</span>
+          <input type="number" id="cfg-costo-hoja-foto" readonly>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
     <div class="card-title">🖊 Tinta</div>
     <div class="field-row">
       <div class="field">
@@ -1372,6 +1396,13 @@ function calcCostoHoja() {
   document.getElementById('cfg-costo-hoja').value = costo.toFixed(4);
 }
 
+function calcCostoHojaFoto() {
+  const precio = parseFloat(document.getElementById('cfg-resma-foto-precio').value) || 0;
+  const hojas = parseFloat(document.getElementById('cfg-resma-foto-hojas').value) || 0;
+  const costo = hojas > 0 ? precio / hojas : 0;
+  document.getElementById('cfg-costo-hoja-foto').value = costo.toFixed(4);
+}
+
 function calcCostoMl() {
   const litro = parseFloat(document.getElementById('cfg-tinta-litro').value) || 0;
   const ml = litro / 1000;
@@ -1384,6 +1415,9 @@ function saveConfig() {
     resma_precio: document.getElementById('cfg-resma-precio').value,
     resma_hojas: document.getElementById('cfg-resma-hojas').value,
     costo_hoja: document.getElementById('cfg-costo-hoja').value,
+    resma_foto_precio: document.getElementById('cfg-resma-foto-precio').value,
+    resma_foto_hojas: document.getElementById('cfg-resma-foto-hojas').value,
+    costo_hoja_foto: document.getElementById('cfg-costo-hoja-foto').value,
     tinta_litro: document.getElementById('cfg-tinta-litro').value,
     tinta_ml: document.getElementById('cfg-tinta-ml').value,
     anillado: document.getElementById('cfg-anillado').value,
@@ -1401,6 +1435,9 @@ function loadConfig() {
   setVal('cfg-resma-precio', d.resma_precio);
   setVal('cfg-resma-hojas', d.resma_hojas);
   setVal('cfg-costo-hoja', d.costo_hoja);
+  setVal('cfg-resma-foto-precio', d.resma_foto_precio);
+  setVal('cfg-resma-foto-hojas', d.resma_foto_hojas);
+  setVal('cfg-costo-hoja-foto', d.costo_hoja_foto);
   setVal('cfg-tinta-litro', d.tinta_litro);
   setVal('cfg-tinta-ml', d.tinta_ml);
   setVal('cfg-anillado', d.anillado);
